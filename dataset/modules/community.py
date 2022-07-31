@@ -2,6 +2,7 @@ import random
 import numpy as np
 from pygsp import graphs
 from utils.plot import plt
+from utils.logger import logger
 
 
 def create_graph(n_vertices, n_clusters, seed=42):
@@ -16,22 +17,24 @@ def create_graph(n_vertices, n_clusters, seed=42):
         N=n_vertices,
         k=n_clusters,
         p=[0.1, 0.2, 0.15],
-        q =0.004,  # 下げるとcommunity 間のスパース
+        q=0.004,  # 下げるとcommunity 間のスパース
         seed=seed
     )
     G.set_coordinates(seed=seed)
     G.compute_differential_operator()
     return G
 
+
 def save_signal_plot(G, signal, sname):
     G.plot_signal(
-        signal, limits=[0, 6], # sigが1-5の値をとるので
+        signal, limits=[0, 6],  # sigが1-5の値をとるので
         vertex_size=120, plot_name='')
     plt.axis('off')
     plt.savefig(f"{sname}.pdf", bbox_inches='tight', pad_inches=0.1)
-    print(f"save pdf to ... {sname}.pdf")
+    logger.success(f"save pdf to ... {sname}.pdf")
     plt.clf()
     plt.close()
+
 
 def generate_original_signal(node_com, sig_min, sig_max, Nclass, seed):
     """
@@ -46,9 +49,10 @@ def generate_original_signal(node_com, sig_min, sig_max, Nclass, seed):
     base_signal = list(range(sig_min, sig_max+1))
     select = random.sample(base_signal, Nclass)
     for i, s in enumerate(select):
-        idx = np.where(node_com==i)[0]
+        idx = np.where(node_com == i)[0]
         zeros_signal[idx] = s
     return zeros_signal
+
 
 def generate_original_signals(G, N: int, _min: float, _max: float, Nclass: int):
     """
@@ -65,6 +69,7 @@ def generate_original_signals(G, N: int, _min: float, _max: float, Nclass: int):
     data = np.stack(data)
     return data
 
+
 def generate_degradation_vector(node_com, percent, seed):
     """
     >>> G = create_graph(10, 3)
@@ -80,6 +85,7 @@ def generate_degradation_vector(node_com, percent, seed):
     miss_vector = np.random.choice([0, 1], size=N, p=[ratio, 1 - ratio])
     return miss_vector
 
+
 def generate_degradation_vectors(G, N, percent):
     """
     >>> G = create_graph(10, 3)
@@ -91,6 +97,6 @@ def generate_degradation_vectors(G, N, percent):
      [1 1 1 1 1 1 1 0 1 1]]
     """
     missing_vectors = [generate_degradation_vector(
-            G.info['node_com'], percent=percent, seed=n) for n in range(N)]
+        G.info['node_com'], percent=percent, seed=n) for n in range(N)]
     missing_vectors = np.stack(missing_vectors)
     return missing_vectors

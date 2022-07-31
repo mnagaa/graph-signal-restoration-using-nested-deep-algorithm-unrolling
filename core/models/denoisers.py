@@ -26,7 +26,7 @@ class GraphDAU(nn.Module):
         torch.manual_seed(0)
         np.random.seed(seed=42)
         self.params = params
-        self.N, self.E = dataset.N, dataset.E	# Num of nodes and edges
+        self.N, self.E = dataset.N, dataset.E  # Num of nodes and edges
         self.setup(params.suffix, dataset)
         self.gammas = nn.ParameterList(
             [nn.Parameter(torch.rand([params.n_channels])) for _ in range(params.L)])
@@ -45,23 +45,21 @@ class GraphDAU(nn.Module):
         elif params.suffix == 'EN-C':
             self.denoiser = self.EN_C
 
-    def setup(self, suffix: Suffix, dataset, with_sparse: bool=True):
+    def setup(self, suffix: Suffix, dataset):
         M = dataset.M  # incidence matrix
-        if not with_sparse:
-            self.M = torch.tensor(M)
-            self.Mt = torch.transpose(self.M, 0, 1)
-        else:
-            # sparse matrix
-            self.M_sp = torch.tensor(M).to_sparse()
-            self.Mt_sp = torch.transpose(self.M, 0, 1).to_sparse()
-        self.I = torch.eye(self.N)# Identity matrix
+        self.M = torch.tensor(M)
+        self.Mt = torch.transpose(self.M, 0, 1)
+        # sparse matrix
+        self.M_sp = torch.tensor(M).to_sparse()
+        self.Mt_sp = torch.transpose(self.M, 0, 1).to_sparse()
+        self.I = torch.eye(self.N)  # Identity matrix
         self.I_sp = self.I.to_sparse().double()
         if suffix in ['TV-E', 'EN-E']:
             self.ones = torch.ones(self.N)  # vector of ones
             # eigendecomposition of graph Laplacian
-            self.eigenV = torch.tensor(dataset.eigenV) # vector
+            self.eigenV = torch.tensor(dataset.eigenV)  # vector
             self.U = torch.tensor(dataset.U)
-            self.Ut = torch.transpose(self.U,0,1)
+            self.Ut = torch.transpose(self.U, 0, 1)
 
         elif suffix in ['TV-C', 'EN-C']:
             L = dataset.L
@@ -88,13 +86,15 @@ class GraphDAU(nn.Module):
                 g_lth = noisy_[:, c].view(-1, 1) + (1.0 / gamma[c]) * b2
                 x = torch.einsum('nm, mk -> nk', a2, g_lth)
                 x_list1.append(x.squeeze())
-            x = torch.stack(x_list1, dim=1)  #torch.Size([250, 1])
+            x = torch.stack(x_list1, dim=1)  # torch.Size([250, 1])
             x_list.append(x)
 
             # equation (2)
             for c in range(self.params.n_channels):  # channels
-                v = torch.sparse.mm(self.M_sp, x[:,c].view(-1, 1)) + y[idx][:,c].view(-1, 1)
-                z[idx][:, c] = soft_threshold(v.squeeze(), beta[c])  # soft_thresh
+                v = torch.sparse.mm(
+                    self.M_sp, x[:, c].view(-1, 1)) + y[idx][:, c].view(-1, 1)
+                z[idx][:, c] = soft_threshold(
+                    v.squeeze(), beta[c])  # soft_thresh
 
             # equation (3)
             y[idx] = y[idx] + torch.sparse.mm(self.M_sp, x) - z[idx]
@@ -105,24 +105,27 @@ class GraphDAU(nn.Module):
         gamma = self.gammas[layer]
         beta = self.betas[layer]
         x_list = []
-        for idx, g1 in enumerate(g): #torch.Size([250, 1])
+        for idx, g1 in enumerate(g):  # torch.Size([250, 1])
             x_list1 = []
             # equation (1)
             for c in range(self.params.n_channels):  # channels
-                g2 = torch.sparse.mm(self.Mt_sp, (z[idx][:,c]-y[idx][:,c]).view(-1, 1)).squeeze()
-                g_lth = g1[:,c] + ( 1/gamma[c] ) * g2
+                g2 = torch.sparse.mm(
+                    self.Mt_sp, (z[idx][:, c]-y[idx][:, c]).view(-1, 1)).squeeze()
+                g_lth = g1[:, c] + (1/gamma[c]) * g2
                 g_lth = g_lth.view(-1, 1)
                 x = self.filter_H(g_lth, gamma_lth=gamma[c])
                 x_list1.append(x)
 
-            x = torch.stack(x_list1, dim=1)	#torch.Size([250, 1])
+            x = torch.stack(x_list1, dim=1)  # torch.Size([250, 1])
             x = torch.squeeze(x, dim=2)
             x_list.append(x)
 
             # equation (2)
             for c in range(self.params.n_channels):  # channels
-                v = torch.sparse.mm(self.M_sp, x[:,c].view(-1, 1)) + y[idx][:,c].view(-1, 1)
-                z[idx][:,c] = soft_threshold(v.squeeze(), beta[c])	#soft_thresh
+                v = torch.sparse.mm(
+                    self.M_sp, x[:, c].view(-1, 1)) + y[idx][:, c].view(-1, 1)
+                z[idx][:, c] = soft_threshold(
+                    v.squeeze(), beta[c])  # soft_thresh
 
             # equation (3)
             y[idx] = y[idx] + torch.sparse.mm(self.M_sp, x) - z[idx]
@@ -153,8 +156,10 @@ class GraphDAU(nn.Module):
             x_list.append(x)
             # equation (2)
             for c in range(self.params.n_channels):  # channels
-                v = torch.sparse.mm(self.M_sp, x[:,c].view(-1, 1)) + y[idx][:,c].view(-1, 1)
-                z[idx][:, c] = alpha[c] * soft_threshold(v.squeeze(), beta[c])  # soft_thresh
+                v = torch.sparse.mm(
+                    self.M_sp, x[:, c].view(-1, 1)) + y[idx][:, c].view(-1, 1)
+                z[idx][:, c] = alpha[c] * \
+                    soft_threshold(v.squeeze(), beta[c])  # soft_thresh
 
             # equation (3)
             y[idx] = y[idx] + torch.sparse.mm(self.M_sp, x) - z[idx]
@@ -174,8 +179,9 @@ class GraphDAU(nn.Module):
             x_list1 = []
             # equation (1)
             for c in range(self.params.n_channels):
-                g2 = torch.sparse.mm(self.Mt_sp, (z[idx][:,c]-y[idx][:,c]).view(-1, 1)).squeeze()
-                g_lth = g1[:,c] + ( 1/gamma[c] ) * g2
+                g2 = torch.sparse.mm(
+                    self.Mt_sp, (z[idx][:, c]-y[idx][:, c]).view(-1, 1)).squeeze()
+                g_lth = g1[:, c] + (1/gamma[c]) * g2
                 g_lth = g_lth.view(-1, 1)
                 x = self.filter_H(g_lth, gamma_lth=gamma[c])
                 x_list1.append(x)
@@ -184,8 +190,10 @@ class GraphDAU(nn.Module):
             # equation (2)
             x_list.append(x)
             for c in range(self.params.n_channels):
-                v = torch.sparse.mm(self.M_sp, x[:,c].view(-1, 1)) + y[idx][:,c].view(-1, 1)
-                z[idx][:,c] = alpha[c] * soft_threshold(v.squeeze(), beta[c])  # soft_thresh
+                v = torch.sparse.mm(
+                    self.M_sp, x[:, c].view(-1, 1)) + y[idx][:, c].view(-1, 1)
+                z[idx][:, c] = alpha[c] * \
+                    soft_threshold(v.squeeze(), beta[c])  # soft_thresh
             # equation (3)
             y[idx] = y[idx] + torch.sparse.mm(self.M_sp, x) - z[idx]
         return x_list
@@ -194,8 +202,10 @@ class GraphDAU(nn.Module):
         batch_size = g.size()[0]
         # auxiliary variables
         z, y = (
-            [torch.rand([self.E, self.params.n_channels]).double() for _ in range(batch_size)],
-            [torch.rand([self.E, self.params.n_channels]).double() for _ in range(batch_size)]
+            [torch.rand([self.E, self.params.n_channels]).double()
+             for _ in range(batch_size)],
+            [torch.rand([self.E, self.params.n_channels]).double()
+             for _ in range(batch_size)]
         )
         for layer in range(self.params.L):
             x_list = self.denoiser(g, layer, z, y)
@@ -223,7 +233,7 @@ class GraphDAU(nn.Module):
                     Zi_k = torch.sparse.mm(L_hat_sp, g_lth)
                     Zi.append(Zi_k)
                 else:
-                    Zi_k =  torch.sparse.mm(L_hat_sp, 2 * Zi[-1]) - Zi[-2]
+                    Zi_k = torch.sparse.mm(L_hat_sp, 2 * Zi[-1]) - Zi[-2]
                     Zi.append(Zi_k)
             return Zi
 
@@ -239,9 +249,9 @@ class GraphDAU(nn.Module):
                 for l in range(1, alpha+1):
                     theta_lth = (math.pi * (l - 0.5)) / alpha
                     sum_part = (
-                            sum_part + math.cos(k * theta_lth) *
-                            h_fn((lmax / 2) * (math.cos(theta_lth) + 1))
-                        )
+                        sum_part + math.cos(k * theta_lth) *
+                        h_fn((lmax / 2) * (math.cos(theta_lth) + 1))
+                    )
                 c = (2 / alpha) * sum_part
                 coefs.append(c)
             return coefs
@@ -258,10 +268,12 @@ class GraphDAU(nn.Module):
         comps = torch.stack(comps, dim=1).squeeze()
         coefs = torch.stack(coefs)
         coefs = coefs.view(len(coefs), 1)
-        H_A = torch.einsum('ep,pc->ec',comps.double(), coefs.double())
+        H_A = torch.einsum('ep,pc->ec', comps.double(), coefs.double())
         return H_A
 
     def print_grad(self):
-        gamma = ' '.join([f'{i}: {gamma.grad}' for i, gamma in enumerate(self.gammas)])
-        beta = ' '.join([f'{i}: {beta.grad}' for i, beta in enumerate(self.betas)])
+        gamma = ' '.join([f'{i}: {gamma.grad}' for i,
+                         gamma in enumerate(self.gammas)])
+        beta = ' '.join([f'{i}: {beta.grad}' for i,
+                        beta in enumerate(self.betas)])
         return f'gamma: {gamma}\n beta: {beta}'
