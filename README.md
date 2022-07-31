@@ -46,7 +46,7 @@ $ poetry run python scripts/denoising_community.py
 
 ## Reference
 
-```
+```bibtex
 @article{nagahama2022GraphSignal,
   title = {Graph Signal Restoration Using Nested Deep Algorithm Unrolling},
   author = {Nagahama, Masatoshi and Yamada, Koki and Tanaka, Yuichi and Chan, Stanley H. and Eldar, Yonina C.},
