@@ -17,12 +17,12 @@ The proposed methods show performance improvements over several existing techniq
 
 ## Deep Algorithm Unrolling
 
-<img src="docs/img_module_concept.pdf" width="100%">
+<img src="docs/img_module_concept.png" width="100%">
  Conventional iterative optimization algorithm (left) and deep algorithm unrolling (right).
 
 ## Proposed Method
 
-<img src="docs/img_module_propose_r2022-0525.pdf" width="100%">
+<img src="docs/img_module_propose_r2022-0525.png" width="100%">
 Overview of GraphDAU and NestDAU for graph signal restoration. The top represents NestDAU: General restoration based on PnP-ADMM. The bottom
 represents GraphDAU: Denoiser based on ADMM. GraphDAU can be used as the off-the-shelf denoiser in NestDAU.
 
