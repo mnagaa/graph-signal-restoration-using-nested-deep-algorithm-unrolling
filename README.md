@@ -2,7 +2,7 @@
 
 Paper link: [https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796141](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796141)
 
-**This article is accepted on "IEEE Transactions on Signal Processing"**.
+**This article is accepted to "IEEE Transactions on Signal Processing"**.
 
 ## Abstract:
 Graph signal processing is a ubiquitous task in many applications such as sensor, social, transportation and brain networks, point cloud processing, and graph neural networks.
