@@ -8,8 +8,7 @@ Paper link: [https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796141](https
 Graph signal processing is a ubiquitous task in many applications such as sensor, social, transportation and brain networks, point cloud processing, and graph neural networks.
 Often, graph signals are corrupted in the sensing process, thus requiring restoration. In this paper, we propose two graph signal restoration methods based on deep algorithm unrolling (DAU).
 First, we present a graph signal denoiser by unrolling iterations of the alternating direction method of multiplier (ADMM).
-We then suggest a general restoration method for linear degradation by unrolling iterations of Plug-and-Play ADMM (PnP-ADMM).
-In the second approach, the unrolled ADMM-based denoiser is incorporated as a submodule, leading to a nested DAU structure.
+We then suggest a general restoration method for linear degradation by unrolling iterations of Plug-and-Play ADMM (PnP-ADMM).  In the second approach, the unrolled ADMM-based denoiser is incorporated as a submodule, leading to a nested DAU structure.
 The parameters in the proposed denoising/restoration methods are trainable in an end-to-end manner.
 Our approach is interpretable and keeps the number of parameters small since we only tune graph-independent regularization parameters.
 We overcome two main challenges in existing graph signal restoration methods:
@@ -17,7 +16,6 @@ We overcome two main challenges in existing graph signal restoration methods:
 2) large number of parameters of graph neural networks that result in difficulty of training.
 Several experiments for graph signal denoising and interpolation are performed on synthetic and real-world data.
 The proposed methods show performance improvements over several existing techniques in terms of root mean squared error in both tasks.
-
 
 ## Deep Algorithm Unrolling
 
@@ -30,7 +28,6 @@ The proposed methods show performance improvements over several existing techniq
 Overview of GraphDAU and NestDAU for graph signal restoration. The top represents NestDAU: General restoration based on PnP-ADMM. The bottom
 represents GraphDAU: Denoiser based on ADMM. GraphDAU can be used as the off-the-shelf denoiser in NestDAU.
 
-
 ## Usage
 
 ```
@@ -42,9 +39,6 @@ $ portry run python dataset/setup.py
 # execute denosing signals on community graph
 $ poetry run python scripts/denoising_community.py
 ```
-
-
-
 
 ## Reference
 
