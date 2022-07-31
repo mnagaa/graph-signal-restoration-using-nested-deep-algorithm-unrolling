@@ -3,6 +3,7 @@ import os
 import typing as t
 
 from core.train import Train, TrainingTools
+from core.test import Test
 from core.common import Suffix
 from params import Params
 
@@ -41,6 +42,11 @@ def execute_denoising_community_GraphDAU(
     training = Train(tools, save_dir=save_dir)
     training.run(epochs=epochs)
 
+    testset = Community(CommunityProps(partition='test', task='denoising',
+                                       data_name=data_name, compute_fourier_basis=compute_fourier_basis))
+    test = Test(params, save_dir, device='cpu', model=model, testset=testset)
+    test.run()
+
 
 def execute_denoising_community_NestDAU(
     P: int = 1,
@@ -74,12 +80,17 @@ def execute_denoising_community_NestDAU(
     training = Train(tools, save_dir=save_dir)
     training.run(epochs=epochs)
 
+    testset = Community(CommunityProps(partition='test', task='denoising',
+                                       data_name=data_name, compute_fourier_basis=compute_fourier_basis))
+    test = Test(params, save_dir, device='cpu', model=model, testset=testset)
+    test.run()
+
 
 if __name__ == '__main__':
     execute_denoising_community_GraphDAU(
-        L=2, epochs=5, suffix='TV-E', data_name='dataA')
+        L=2, epochs=2, suffix='TV-E', data_name='dataA')
     execute_denoising_community_NestDAU(
-        P=2, L=2, epochs=3, suffix='TV-E', data_name='dataA')
+        P=2, L=2, epochs=2, suffix='TV-E', data_name='dataA')
 
     # for data_name in t.get_args(DataName):
     #     for L in range(1, 15):

@@ -30,6 +30,22 @@ The proposed methods show performance improvements over several existing techniq
 Overview of GraphDAU and NestDAU for graph signal restoration. The top represents NestDAU: General restoration based on PnP-ADMM. The bottom
 represents GraphDAU: Denoiser based on ADMM. GraphDAU can be used as the off-the-shelf denoiser in NestDAU.
 
+
+## Usage
+
+```
+$ portry install
+
+# setup dataset
+$ portry run python dataset/setup.py
+
+# execute denosing signals on community graph
+$ poetry run python scripts/denoising_community.py
+```
+
+
+
+
 ## Reference
 
 ```
