@@ -1,9 +1,8 @@
 # Graph Signal Restoration Using Nested Deep Algorithm Unrolling
 
-**This article is accepted to "IEEE Transactions on Signal Processing"**.
+Paper link: [https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796141](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796141)
 
-- [Paper Link](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796141)
-- [Project Page](https://mnagaa.github.io/graph-signal-restoration-using-nested-deep-algorithm-unrolling/)
+**This article is accepted to "IEEE Transactions on Signal Processing"**.
 
 ## Abstract:
 Graph signal processing is a ubiquitous task in many applications such as sensor, social, transportation and brain networks, point cloud processing, and graph neural networks.
@@ -18,12 +17,12 @@ The proposed methods show performance improvements over several existing techniq
 
 ## Deep Algorithm Unrolling
 
-<img src="docs/img_module_concept.png" width="100%">
+<img src="./img_module_concept.png" width="100%">
  Conventional iterative optimization algorithm (left) and deep algorithm unrolling (right).
 
 ## Proposed Method
 
-<img src="docs/img_module_propose_r2022-0525.png" width="100%">
+<img src="./img_module_propose_r2022-0525.png" width="100%">
 Overview of GraphDAU and NestDAU for graph signal restoration. The top represents NestDAU: General restoration based on PnP-ADMM. The bottom
 represents GraphDAU: Denoiser based on ADMM. GraphDAU can be used as the off-the-shelf denoiser in NestDAU.
 
@@ -31,7 +30,7 @@ represents GraphDAU: Denoiser based on ADMM. GraphDAU can be used as the off-the
 
 The denoising results of signals on community graph are as follows:
 
-<img src="docs/community.png" width="100%">
+<img src="./community.png" width="100%">
 
 ## Usage (Sample code)
 
