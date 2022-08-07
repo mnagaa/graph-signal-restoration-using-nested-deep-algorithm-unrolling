@@ -26,12 +26,12 @@ class NestDAU(nn.Module):
         self.gdau_params = gdau_params
         self.N = dataset.G.N
         # self.E = self.G.e
-        # self.L_sparse = dataset.G.L  # sparse graph Lapracani
+        # self.L_sparse = dataset.G.L  # sparse graph Lapracian
         self.L = torch.tensor(dataset.G.L.toarray())  # graph lapracian
         self.I = torch.eye(self.N)  # Identity matrix
         # self.I_sp = torch.eye(self.N).to_sparse()
 
-        # Define learnable parameter
+        # Define trainable parameter
         self.rhos = nn.ParameterList(
             [nn.Parameter(torch.rand(1)) for _ in range(self.params.P)])
 
@@ -59,7 +59,6 @@ class NestDAU(nn.Module):
 
         batch_size = y.size()[0]
         y = y.double()  # torch.Size([1, 250, 1])
-        # import pdb; pdb.set_trace()
 
         if self.params.task == 'denoising':
             H = torch.eye(self.N).unsqueeze_(0).repeat(batch_size, 1, 1).double()
