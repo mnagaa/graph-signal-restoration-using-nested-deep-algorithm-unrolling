@@ -1,9 +1,12 @@
 # Graph Signal Restoration Using Nested Deep Algorithm Unrolling
 
+
+<center>
 **This article is accepted to "IEEE Transactions on Signal Processing"**.
 
 [[Paper Link]](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796141)
 [[Project Page]](https://mnagaa.github.io/graph-signal-restoration-using-nested-deep-algorithm-unrolling/)
+</center>
 
 ## Abstract:
 Graph signal processing is a ubiquitous task in many applications such as sensor, social, transportation and brain networks, point cloud processing, and graph neural networks.
@@ -31,8 +34,6 @@ represents GraphDAU: Denoiser based on ADMM. GraphDAU can be used as the off-the
 
 ### Denoising
 
-The denoising results of signals on community graph are as follows:
-
 <img src="./community.png" width="100%">
 <img src="./fig5.png" width="100%">
 <img src="./fig7.png" width="100%">
@@ -40,12 +41,12 @@ The denoising results of signals on community graph are as follows:
 
 ### Interpolation
 
-The interpolation results of signals on community graph are as follows:
-
 <img src="./fig9.png" width="100%">
 
 
 ## Usage (Sample code)
+
+This code is available on `AMD64` architecture.
 
 ```shell
 $ portry install
