@@ -71,9 +71,9 @@ class GraphDAU(nn.Module):
         """Graph total variation with Eigendecomposition"""
         gamma = self.gammas[layer]
         beta = self.betas[layer]
-        x_list = []
+        reconst_signals = []
         for idx, noisy_ in enumerate(noisy):  # torch.Size([250, 1])
-            x_list1 = []
+            tmp_signals = []
             # equation (1)
             for c in range(self.params.n_channels):  # channels
                 inv_vec = 1.0 / (self.ones + (1.0 / gamma[c]) * self.eigenV)
@@ -84,27 +84,26 @@ class GraphDAU(nn.Module):
                 b2 = torch.sparse.mm(self.Mt_sp, b1.view(-1, 1))  # N, 1
 
                 g_lth = noisy_[:, c].view(-1, 1) + (1.0 / gamma[c]) * b2
-                x = torch.einsum('nm, mk -> nk', a2, g_lth)
-                x_list1.append(x.squeeze())
-            x = torch.stack(x_list1, dim=1)  # torch.Size([250, 1])
-            x_list.append(x)
+                x_ = torch.einsum('nm, mk -> nk', a2, g_lth)
+                tmp_signals.append(x_.squeeze())
+            x = torch.stack(tmp_signals, dim=1)  # torch.Size([250, 1])
+            reconst_signals.append(x)
 
             # equation (2)
             for c in range(self.params.n_channels):  # channels
                 v = torch.sparse.mm(
                     self.M_sp, x[:, c].view(-1, 1)) + y[idx][:, c].view(-1, 1)
-                z[idx][:, c] = soft_threshold(
-                    v.squeeze(), beta[c])  # soft_thresh
+                z[idx][:, c] = soft_threshold(v.squeeze(), beta[c])
 
             # equation (3)
             y[idx] = y[idx] + torch.sparse.mm(self.M_sp, x) - z[idx]
-        return x_list
+        return reconst_signals
 
     def TV_C(self, g: torch.Tensor, layer: int, z: torch.Tensor, y: torch.Tensor):
         """Graph total variation with Chebyshev polynomial approximation"""
         gamma = self.gammas[layer]
         beta = self.betas[layer]
-        x_list = []
+        reconst_signals = []
         for idx, g1 in enumerate(g):  # torch.Size([250, 1])
             x_list1 = []
             # equation (1)
@@ -113,12 +112,12 @@ class GraphDAU(nn.Module):
                     self.Mt_sp, (z[idx][:, c]-y[idx][:, c]).view(-1, 1)).squeeze()
                 g_lth = g1[:, c] + (1/gamma[c]) * g2
                 g_lth = g_lth.view(-1, 1)
-                x = self.filter_H(g_lth, gamma_lth=gamma[c])
-                x_list1.append(x)
+                x_ = self.filter_H(g_lth, gamma_lth=gamma[c])
+                x_list1.append(x_)
 
             x = torch.stack(x_list1, dim=1)  # torch.Size([250, 1])
             x = torch.squeeze(x, dim=2)
-            x_list.append(x)
+            reconst_signals.append(x)
 
             # equation (2)
             for c in range(self.params.n_channels):  # channels
@@ -129,18 +128,17 @@ class GraphDAU(nn.Module):
 
             # equation (3)
             y[idx] = y[idx] + torch.sparse.mm(self.M_sp, x) - z[idx]
-        return x_list
+        return reconst_signals
 
     def EN_E(self, g: torch.Tensor, layer: int, z: torch.Tensor, y: torch.Tensor):
         gamma = self.gammas[layer]
         beta = self.betas[layer]
         alpha = self.alphas[layer]
-        x_list = []
+        reconst_signals = []
         for idx, g_ in enumerate(g):  # torch.Size([250, 1])
             x_list1 = []
             # equation (1)
             for c in range(self.params.n_channels):  # channels
-                # step 1
                 inv_vec = 1.0 / (self.ones + (1.0 / gamma[c]) * self.eigenV)
                 diag = torch.diag(inv_vec).to_sparse()
                 a1 = torch.sparse.mm(diag, self.Ut)
@@ -149,21 +147,21 @@ class GraphDAU(nn.Module):
                 b2 = torch.sparse.mm(self.Mt_sp, b1.view(-1, 1))  # N, 1
 
                 g_lth = g_[:, c].view(-1, 1) + (1.0 / gamma[c]) * b2
-                x = torch.einsum('nm, mk -> nk', a2, g_lth)
-                x_list1.append(x.squeeze())
+                x_ = torch.einsum('nm, mk -> nk', a2, g_lth)
+                x_list1.append(x_.squeeze())
 
             x = torch.stack(x_list1, dim=1)  # torch.Size([250, 1])
-            x_list.append(x)
+            reconst_signals.append(x)
+
             # equation (2)
             for c in range(self.params.n_channels):  # channels
                 v = torch.sparse.mm(
                     self.M_sp, x[:, c].view(-1, 1)) + y[idx][:, c].view(-1, 1)
-                z[idx][:, c] = alpha[c] * \
-                    soft_threshold(v.squeeze(), beta[c])  # soft_thresh
+                z[idx][:, c] = alpha[c] * soft_threshold(v.squeeze(), beta[c])
 
             # equation (3)
             y[idx] = y[idx] + torch.sparse.mm(self.M_sp, x) - z[idx]
-        return x_list
+        return reconst_signals
 
     def EN_C(self, g: torch.Tensor, layer: int, z: torch.Tensor, y: torch.Tensor):
         """ElasticNet-like regularization with Chebyshev polynomial approximation
@@ -174,7 +172,7 @@ class GraphDAU(nn.Module):
         gamma = self.gammas[layer]
         beta = self.betas[layer]
         alpha = self.alphas[layer]
-        x_list = []
+        reconst_signals = []
         for idx, g1 in enumerate(g):
             x_list1 = []
             # equation (1)
@@ -183,20 +181,21 @@ class GraphDAU(nn.Module):
                     self.Mt_sp, (z[idx][:, c]-y[idx][:, c]).view(-1, 1)).squeeze()
                 g_lth = g1[:, c] + (1/gamma[c]) * g2
                 g_lth = g_lth.view(-1, 1)
-                x = self.filter_H(g_lth, gamma_lth=gamma[c])
-                x_list1.append(x)
+                x_ = self.filter_H(g_lth, gamma_lth=gamma[c])
+                x_list1.append(x_)
             x = torch.stack(x_list1, dim=1)
             x = torch.squeeze(x, dim=2)
+
             # equation (2)
-            x_list.append(x)
+            reconst_signals.append(x)
             for c in range(self.params.n_channels):
                 v = torch.sparse.mm(
                     self.M_sp, x[:, c].view(-1, 1)) + y[idx][:, c].view(-1, 1)
-                z[idx][:, c] = alpha[c] * \
-                    soft_threshold(v.squeeze(), beta[c])  # soft_thresh
+                z[idx][:, c] = alpha[c] * soft_threshold(v.squeeze(), beta[c])
+
             # equation (3)
             y[idx] = y[idx] + torch.sparse.mm(self.M_sp, x) - z[idx]
-        return x_list
+        return reconst_signals
 
     def forward(self, g: torch.Tensor):
         batch_size = g.size()[0]
@@ -276,4 +275,4 @@ class GraphDAU(nn.Module):
                          gamma in enumerate(self.gammas)])
         beta = ' '.join([f'{i}: {beta.grad}' for i,
                         beta in enumerate(self.betas)])
-        return f'gamma: {gamma}\n beta: {beta}'
+        return f"gamma: {gamma}\n beta: {beta}"
