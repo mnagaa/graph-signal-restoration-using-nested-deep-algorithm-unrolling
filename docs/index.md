@@ -1,12 +1,10 @@
 # Graph Signal Restoration Using Nested Deep Algorithm Unrolling
 
 
-<center>
 **This article is accepted to "IEEE Transactions on Signal Processing"**.
 
 [[Paper Link]](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9796141)
 [[Project Page]](https://mnagaa.github.io/graph-signal-restoration-using-nested-deep-algorithm-unrolling/)
-</center>
 
 ## Abstract:
 Graph signal processing is a ubiquitous task in many applications such as sensor, social, transportation and brain networks, point cloud processing, and graph neural networks.
